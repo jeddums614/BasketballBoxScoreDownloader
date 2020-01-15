@@ -278,7 +278,7 @@ int main(int argc, char** argv)
 	        		hometeamname.replace(pos, 1, "\'\'", 2);
 	        		pos += 2;
 	        	}
-	        	std::string gamecountquery = "select count(*) from gamebygamedata where (lower(team1) = lower('"+awayteamname+"') and lower(team2) = lower('"+hometeamname+"')) and gamedate='"+awayteam.GetDateString()+"';";
+	        	std::string gamecountquery = "select count(*) from gamebygamedata where (lower(team1) = lower('"+awayteamname+"') and lower(team2) = lower('"+hometeamname+"')) and gamedate='"+awayteam.GetDateString()+"' and team1pts="+std::to_string(awayteam.GetTeamPoints())+" and team2pts="+std::to_string(hometeam.GetTeamPoints())+";";
 	        	std::vector<std::vector<std::string>> res = DBWrapper::GetResults(gamecountquery);
 
 	        	int numgames = std::stoi(res[0].at(0));
