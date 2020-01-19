@@ -8,6 +8,8 @@
 #include <iostream>
 #include <regex>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include "Downloader.h"
 #include "IBoxScore.h"
 #include "AspxBoxScore.h"
@@ -281,7 +283,23 @@ int main(int argc, char** argv)
 	        	std::string gamecountquery = "select count(*) from gamebygamedata where (lower(team1) = lower('"+awayteamname+"') and lower(team2) = lower('"+hometeamname+"')) and gamedate='"+awayteam.GetDateString()+"' and team1pts="+std::to_string(awayteam.GetTeamPoints())+" and team2pts="+std::to_string(hometeam.GetTeamPoints())+";";
 	        	std::vector<std::vector<std::string>> res = DBWrapper::GetResults(gamecountquery);
 
-	        	int numgames = std::stoi(res[0].at(0));
+	        	int numgames = -1;
+
+	        	while (res[0][0].empty())
+	        	{
+	        		res = DBWrapper::GetResults(gamecountquery);
+	        	}
+
+	        	std::cout << "value = " << res[0][0] << std::endl;
+	        	try
+	        	{
+	        		numgames = std::stoi(res[0][0]);
+	        	}
+	        	catch (std::invalid_argument &e)
+	        	{
+	        		std::cout << "stoi invalid argument: " << e.what() << std::endl;
+	        		numgames = -1;
+	        	}
 
 	        	if (numgames == 0)
 	        	{
@@ -297,7 +315,7 @@ int main(int argc, char** argv)
 						  << "," << hometeam.GetTotalFieldGoals() << "," << hometeam.GetTotalFieldGoalAttempts()
 						  << "," << hometeam.GetTotalTurnovers() << "," << hometeam.GetTotalOffensiveRebounds()
 						  << "," << hometeam.GetTotalRebounds() << "," << hometeam.GetTotalFreeThrows()
-						  << "," << hometeam.GetTotalFreeThrowAttempts() << ")";
+						  << "," << hometeam.GetTotalFreeThrowAttempts() << ");";
 
 	        		if (DBWrapper::AddEntry(query.str()))
 	        		{
@@ -309,6 +327,8 @@ int main(int argc, char** argv)
 	        		}
 	        	}
 			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
 
 		boxScoreObj.reset();
