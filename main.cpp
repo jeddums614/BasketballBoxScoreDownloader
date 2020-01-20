@@ -10,6 +10,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <cctype>
 #include "Downloader.h"
 #include "IBoxScore.h"
 #include "AspxBoxScore.h"
@@ -200,15 +201,6 @@ int main(int argc, char** argv)
 		}
 
 		int numgames = 0;
-		/*double totalpossessions = 0;
-		double totalthreepointfg = 0;
-		double totalfg = 0;
-		double totalfga = 0;
-		double totalto = 0;
-		double totaloffreb = 0;
-		double totalreb = 0;
-		double totalftm = 0;
-		double totalfta = 0;*/
 		for (std::string bslink : boxscorelinks)
 		{
 			//std::cout << "boxscore link: " << bslink << std::endl;
@@ -235,8 +227,8 @@ int main(int argc, char** argv)
 
 	        	if (baseurl.compare("https://miamiredhawks.com") == 0 || baseurl.compare("https://hurricanesports.com") == 0)
 	        	{
-	        		std::string lowername;
-	        		std::transform(awayteam.GetTeamName().begin(),awayteam.GetTeamName().end(),lowername.begin(),::tolower);
+	        		std::string lowername = "";
+	        		std::transform(awayteam.GetTeamName().begin(),awayteam.GetTeamName().end(),std::back_inserter(lowername),[](char c) { return std::tolower(c);});
 	        		if (lowername.compare("miami") == 0)
 	        		{
 	        			if (baseurl.compare("https://hurricanesports.com") == 0)
@@ -251,7 +243,7 @@ int main(int argc, char** argv)
 	        		else
 	        		{
 	        			lowername = "";
-	        			std::transform(hometeam.GetTeamName().begin(),hometeam.GetTeamName().end(),lowername.begin(),::tolower);
+	        			std::transform(hometeam.GetTeamName().begin(),hometeam.GetTeamName().end(),std::back_inserter(lowername),[](char c) { return std::tolower(c);});
 	        			if (lowername.compare("miami") == 0)
 	        			{
 	        				if (baseurl.compare("https://hurricanesports.com") == 0)
