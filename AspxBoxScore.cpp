@@ -58,7 +58,7 @@ std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(const std::string
 			}
 			datelabelfound = false;
 		}
-		else if (std::regex_search(line,teammatch,std::regex("<h2 class=\"sub-heading\">([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)<\\/h2>")) && (awayteam.GetTeamName().empty() || hometeam.GetTeamName().empty()))
+		else if (std::regex_search(line,teammatch,std::regex("<h2 class=\"sub-heading\">([A-Za-z0-9&.\\-();'?_#\\/,\\[\\] ]+)<\\/h2>")) && (awayteam.GetTeamName().empty() || hometeam.GetTeamName().empty()))
 		{
 			//if (team1.empty())
 			if (awayteam.GetTeamName().empty())
