@@ -23,6 +23,14 @@ enum StatValType
 	TOTALPOSSESSIONS
 };
 
+enum BoxScoreFormatType {
+	ASPX,
+	XML,
+	DBML,
+	PDF,
+	OTHER
+};
+
 class Utils
 {
 public:
@@ -30,6 +38,7 @@ public:
 	~Utils() = delete;
 	Utils(const Utils &) = delete;
 	static std::string exec(const std::string & cmd);
+	static void Run(int startid, int endid);
 };
 
 
