@@ -36,6 +36,7 @@ void Utils::Run(int startid, int endid)
 {
 	std::string teamquery = "select baseurl,scheduleurl,namestosearch,boxscoreformattype,startdate from team where id >= " + std::to_string(startid) + " and id <= " + std::to_string(endid) + ";";
 	std::vector<std::vector<std::string>> teams = DBWrapper::GetResults(teamquery);
+
 	for (std::vector<std::string> teaminfo : teams)
 	{
 		std::string baseurl = teaminfo[0];
@@ -209,8 +210,10 @@ void Utils::Run(int startid, int endid)
 
 	        	if (baseurl.compare("https://miamiredhawks.com") == 0 || baseurl.compare("https://hurricanesports.com") == 0)
 	        	{
-	        		std::string lowername = "";
-	        		std::transform(awayteam.GetTeamName().begin(),awayteam.GetTeamName().end(),std::back_inserter(lowername),[](char c) { return std::tolower(c);});
+	        		std::string lowername = awayteam.GetTeamName();
+	        		std::for_each(lowername.begin(), lowername.end(), [](char &c) { c = std::tolower(c);});
+	        		std::cout << "lowername = " << lowername << std::endl;
+
 	        		if (lowername.compare("miami") == 0)
 	        		{
 	        			if (baseurl.compare("https://hurricanesports.com") == 0)
@@ -224,8 +227,9 @@ void Utils::Run(int startid, int endid)
 	        		}
 	        		else
 	        		{
-	        			lowername = "";
-	        			std::transform(hometeam.GetTeamName().begin(),hometeam.GetTeamName().end(),std::back_inserter(lowername),[](char c) { return std::tolower(c);});
+	        			lowername = hometeam.GetTeamName();
+	        			std::for_each(lowername.begin(), lowername.end(), [](char &c) { c = std::tolower(c);});
+	        			std::cout << "lowername2 = " << lowername << std::endl;
 	        			if (lowername.compare("miami") == 0)
 	        			{
 	        				if (baseurl.compare("https://hurricanesports.com") == 0)
