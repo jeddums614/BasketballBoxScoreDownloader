@@ -258,14 +258,36 @@ void Utils::Run(int startid, int endid)
 	        		hometeamname.replace(pos, 1, "\'\'", 2);
 	        		pos += 2;
 	        	}
-	        	std::string gamecountquery = "select count(*) from gamebygamedata where (lower(team1) = lower('"+awayteamname+"') and lower(team2) = lower('"+hometeamname+"')) and gamedate='"+awayteam.GetDateString()+"' and team1pts="+std::to_string(awayteam.GetTeamPoints())+" and team2pts="+std::to_string(hometeam.GetTeamPoints())+";";
-	        	std::vector<std::vector<std::string>> res = DBWrapper::GetResults(gamecountquery);
+	        	std::stringstream gamecountquery;
+	        	gamecountquery << "select count(*) from gamebygamedata where "
+	        			       << "(lower(team1)=lower('" << awayteamname << "') "
+							   << "or lower(team2)=lower('" << hometeamname << "')) "
+							   << "and gamedate='" << awayteam.GetDateString() << "' "
+							   << "and team1pts=" << awayteam.GetTeamPoints() << " "
+							   << "and team2pts=" << hometeam.GetTeamPoints() << " "
+							   << "and team1total3ptfg=" << awayteam.GetThreePointFieldGoals() << " "
+							   << "and team1totalfgm=" << awayteam.GetTotalFieldGoals() << " "
+							   << "and team1totalfga=" << awayteam.GetTotalFieldGoalAttempts() << " "
+							   << "and team1totalto=" << awayteam.GetTotalTurnovers() << " "
+							   << "and team1totaloreb=" << awayteam.GetTotalOffensiveRebounds() << " "
+							   << "and team1totalreb=" << awayteam.GetTotalRebounds() << " "
+							   << "and team1totalftm=" << awayteam.GetTotalFreeThrows() << " "
+							   << "and team1totalfta=" << awayteam.GetTotalFreeThrowAttempts() << " "
+							   << "and team2total3ptfg=" << hometeam.GetThreePointFieldGoals() << " "
+							   << "and team2totalfgm=" << hometeam.GetTotalFieldGoals() << " "
+							   << "and team2totalfga=" << hometeam.GetTotalFieldGoalAttempts() << " "
+							   << "and team2totalto=" << hometeam.GetTotalTurnovers() << " "
+							   << "and team2totaloreb=" << hometeam.GetTotalOffensiveRebounds() << " "
+							   << "and team2totalreb=" << hometeam.GetTotalRebounds() << " "
+							   << "and team2totalftm=" << hometeam.GetTotalFreeThrows() << " "
+							   << "and team2totalfta=" << hometeam.GetTotalFreeThrowAttempts() << ";";
+	        	std::vector<std::vector<std::string>> res = DBWrapper::GetResults(gamecountquery.str());
 
 	        	int numgames = -1;
 
 	        	while (res[0][0].empty())
 	        	{
-	        		res = DBWrapper::GetResults(gamecountquery);
+	        		res = DBWrapper::GetResults(gamecountquery.str());
 	        	}
 
 	        	std::cout << "value = " << res[0][0] << std::endl;
