@@ -48,7 +48,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 				break;
 			}
 		}
-		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)")) && team1.empty() && team2.empty())
+		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) && team1.empty() && team2.empty())
 		{
 			team1 = tmp2.str(1);
 			awaystatline["TEAM"] = team1;

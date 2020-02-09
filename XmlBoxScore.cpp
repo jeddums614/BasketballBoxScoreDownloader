@@ -128,13 +128,13 @@ std::optional<std::pair<Stats,Stats>> XmlBoxScore::ProcessUrl(const std::string 
 			numvalsfound = 0;
 			numhyphensfound = 0;
 		}
-		else if (std::regex_search(line,tmp,std::regex("<div class=\"tab-label\" id=\"team-label-boxscore-v\">([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)<\\/div>")) && team1.empty())
+		else if (std::regex_search(line,tmp,std::regex("<div class=\"tab-label\" id=\"team-label-boxscore-v\">([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)<\\/div>")) && team1.empty())
 		{
 			team1 = tmp.str(1);
 			awaystatline["TEAM"] = team1;
 			awayteam.SetTeamName(team1);
 		}
-		else if (std::regex_search(line,tmp,std::regex("<div class=\"tab-label\" id=\"team-label-boxscore-h\">([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)<\\/div>")) && team2.empty())
+		else if (std::regex_search(line,tmp,std::regex("<div class=\"tab-label\" id=\"team-label-boxscore-h\">([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)<\\/div>")) && team2.empty())
 		{
 			team2 = tmp.str(1);
 			homestatline["TEAM"] = team2;

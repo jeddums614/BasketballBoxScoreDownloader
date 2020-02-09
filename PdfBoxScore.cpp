@@ -57,8 +57,8 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			//std::cout << datestr << std::endl;
 		}
-		else if ((std::regex_search(line,match,std::regex("^\\s+([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+) at ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)")) ||
-				  std::regex_search(line,match,std::regex("^\\s+([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)")))&&
+		else if ((std::regex_search(line,match,std::regex("^\\s+([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) at ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) ||
+				  std::regex_search(line,match,std::regex("^\\s+([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")))&&
 				team1.empty() && team2.empty())
 		{
 			team1 = match.str(1);
