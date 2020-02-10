@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <iostream>
 
-std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
+std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(std::string_view url, std::string_view startdate)
 {
 	std::string bscontent = Downloader::GetContent(url);
 	std::istringstream iss{bscontent};

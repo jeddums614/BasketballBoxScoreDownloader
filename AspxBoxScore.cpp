@@ -12,9 +12,9 @@
 #include <regex>
 #include <optional>
 
-std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
+std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(std::string_view url, std::string_view startdate)
 {
-	std::string bscontent = Downloader::GetContent(url);
+	std::string bscontent = Downloader::GetContent(url.data());
 	std::istringstream iss{bscontent};
 	std::string line;
 	bool totalfound = false;

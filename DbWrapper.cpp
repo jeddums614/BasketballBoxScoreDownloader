@@ -11,7 +11,7 @@
 #include <fstream>
 #include <chrono>
 
-std::vector<std::vector<std::string>> DBWrapper::GetResults(const std::string & query)
+std::vector<std::vector<std::string>> DBWrapper::GetResults(std::string_view query)
 {
 	std::vector<std::vector<std::string>> results;
 
@@ -34,7 +34,7 @@ std::vector<std::vector<std::string>> DBWrapper::GetResults(const std::string & 
     int rc = 0;
     do
     {
-    	rc = sqlite3_prepare_v2(cbbdb,query.c_str(),-1,&stmt,NULL);
+    	rc = sqlite3_prepare_v2(cbbdb,query.data(),-1,&stmt,NULL);
     	std::cout << "select rc = " << rc << std::endl;
     }
     while (rc != SQLITE_OK);

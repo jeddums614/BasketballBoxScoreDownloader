@@ -14,7 +14,7 @@ class DbmlBoxScore : public IBoxScore
 {
 public:
 	virtual ~DbmlBoxScore(){}
-	std::optional<std::pair<Stats,Stats>> ProcessUrl(const std::string & url, const std::string & startdate);
+	std::optional<std::pair<Stats,Stats>> ProcessUrl(std::string_view url, std::string_view startdate);
 };
 
 

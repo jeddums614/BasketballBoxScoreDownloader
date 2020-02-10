@@ -10,12 +10,13 @@
 #include <iostream>
 #include <regex>
 
-std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
+std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(std::string_view url, std::string_view startdate)
 {
 	// Download pdf
-	std::string downloadcommand = "curl -s -L -o tmp.pdf " + url;
-	//std::cout << downloadcommand << std::endl;
-	std::string tmp = Utils::exec(downloadcommand);
+	std::stringstream downloadcommand;
+	downloadcommand << "curl -s -L -o tmp.pdf " << url;
+	//std::cout << downloadcommand.str() << std::endl;
+	std::string tmp = Utils::exec(downloadcommand.str());
 	// Convert pdf to text
 	std::string pdftextcommand = "pdftotext -f 1 -l 1 -layout tmp.pdf -";
 	//std::cout << pdftextcommand << std::endl;
