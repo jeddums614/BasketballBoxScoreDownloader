@@ -10,7 +10,7 @@
 #include <iostream>
 #include <regex>
 
-std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(std::string_view url, std::string_view startdate)
+std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
 {
 	// Download pdf
 	std::stringstream downloadcommand;

@@ -10,7 +10,6 @@
 
 #include<vector>
 #include<string>
-#include<string_view>
 
 class DBWrapper
 {
@@ -19,7 +18,7 @@ public:
 	DBWrapper(const DBWrapper &) = delete;
 	~DBWrapper() = delete;
 	DBWrapper& operator=(const DBWrapper &) = delete;
-	static std::vector<std::vector<std::string>> GetResults(std::string_view query);
+	static std::vector<std::vector<std::string>> GetResults(const std::string & query);
 	static bool AddEntry(const std::string & query);
 };
 

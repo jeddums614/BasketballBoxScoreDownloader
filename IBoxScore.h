@@ -10,12 +10,11 @@
 
 #include "Stats.h"
 #include <optional>
-#include <string_view>
 
 class IBoxScore
 {
 public:
-	virtual std::optional<std::pair<Stats, Stats>> ProcessUrl(std::string_view url, std::string_view startdate) = 0;
+	virtual std::optional<std::pair<Stats, Stats>> ProcessUrl(const std::string & url, const std::string & startdate) = 0;
 	virtual ~IBoxScore()
 	{
 

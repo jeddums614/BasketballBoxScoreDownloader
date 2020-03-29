@@ -9,12 +9,11 @@
 #define DOWNLOADER_H_
 
 #include <string>
-#include <string_view>
 
 class Downloader
 {
 public:
-	static std::string GetContent(std::string_view url);
+	static std::string GetContent(const std::string & url);
 	Downloader() = delete;
 	Downloader(const Downloader &) = delete;
 	Downloader& operator=(const Downloader &) = delete;

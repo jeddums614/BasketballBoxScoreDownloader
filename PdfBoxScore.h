@@ -13,7 +13,7 @@
 class PdfBoxScore : public IBoxScore
 {
 public:
-	std::optional<std::pair<Stats,Stats>> ProcessUrl(std::string_view url, std::string_view startdate);
+	std::optional<std::pair<Stats,Stats>> ProcessUrl(const std::string & url, const std::string & startdate);
 };
 
 
