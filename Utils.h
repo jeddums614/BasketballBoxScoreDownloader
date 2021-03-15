@@ -38,7 +38,7 @@ public:
 	~Utils() = delete;
 	Utils(const Utils &) = delete;
 	static std::string exec(const std::string & cmd);
-	static void Run(int startid, int endid);
+	static void Run(int startid);
 };
 
 

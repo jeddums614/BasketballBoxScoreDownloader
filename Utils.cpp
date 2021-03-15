@@ -32,13 +32,15 @@ std::string Utils::exec(const std::string & cmd) {
     return result;
 }
 
-void Utils::Run(int startid, int endid)
+void Utils::Run(int teamId)
 {
-	std::string teamquery = "select baseurl,scheduleurl,namestosearch,boxscoreformattype,startdate from team where id >= " + std::to_string(startid) + " and id <= " + std::to_string(endid) + ";";
+	std::string teamquery = "select baseurl,scheduleurl,namestosearch,boxscoreformattype,startdate from team where id = " + std::to_string(teamId) + ";";
 	std::vector<std::vector<std::string>> teams = DBWrapper::GetResults(teamquery);
 
-	for (std::vector<std::string> teaminfo : teams)
-	{
+	std::vector<std::string> teaminfo = teams[0];
+
+	//for (std::vector<std::string> teaminfo : teams)
+	//{
 		std::string baseurl = teaminfo[0];
 		std::string scheduleurl = teaminfo[1];
 		std::string teamname = teaminfo[2];
@@ -76,7 +78,7 @@ void Utils::Run(int startid, int endid)
 		{
 			std::string link = matches.str(1);
 			std::smatch tmpmatch;
-			//std::cout << link << std::endl; // debug statement
+			std::cout << link << std::endl; // debug statement
 			if ((link.find("boxscore") != std::string::npos &&
 				link.find("women") == std::string::npos &&
 			    (link.find("path=mbb") != std::string::npos ||
@@ -180,7 +182,7 @@ void Utils::Run(int startid, int endid)
 
 		if (boxScoreObj == NULL)
 		{
-			continue;
+			return;
 		}
 
 		int numgames = 0;
@@ -330,5 +332,5 @@ void Utils::Run(int startid, int endid)
 		}
 
 		boxScoreObj.reset();
-	}
+	//}
 }

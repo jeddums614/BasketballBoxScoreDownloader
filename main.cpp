@@ -8,40 +8,36 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <unistd.h>
+#include <thread>
 #include "Utils.h"
+#include "ThreadPool.h"
+#include "DbWrapper.h"
 
 int main(int argc, char** argv)
 {
 	// number of threads
-	unsigned int num = 51;
-
-	std::vector<std::thread> thVector;
-
-	unsigned int startid = 1;
-	unsigned int endid = 7;
-	for (unsigned int i = 0; i < num; ++i, startid +=7, endid += 7)
+	unsigned int numThreads = std::thread::hardware_concurrency();
+	if (numThreads == 0)
 	{
-		if (endid > 353)
-		{
-			endid = 353;
-		}
-		std::cout << "passing " << startid << " and " << endid << " as parameters" << std::endl;
-		thVector.emplace_back(Utils::Run,startid,endid);
+		numThreads = sysconf(_SC_NPROCESSORS_ONLN);
 	}
 
-	try
-	{
-		for (std::thread & th : thVector)
-		{
-			if (th.joinable())
-			{
-				th.join();
-			}
-		}
+	std::string numTeamQuery = "select count(*) from team";
+	std::vector<std::vector<std::string>> numRes = DBWrapper::GetResults(numTeamQuery);
+
+	int numTeams = std::stoi(numRes[0][0]);
+
+	ThreadPool tp;
+	std::vector<std::future<void>> results;
+
+	for (int i = 0; i < numTeams; ++i) {
+		std::cout << "passing " << i+1 << " as parameter" << std::endl;
+	    results.emplace_back(tp.enqueue([i](){Utils::Run(i+1);}));
 	}
-	catch (std::exception & e)
-	{
-		std::cout << e.what() << std::endl;
+
+	for (auto& res : results) {
+		res.get();
 	}
 
 	return 0;

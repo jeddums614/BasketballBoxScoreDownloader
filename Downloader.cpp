@@ -22,7 +22,7 @@ std::string Downloader::GetContent(const std::string & url)
 
 	if (curl)
 	{
-		curl_easy_setopt(curl,CURLOPT_URL,url);
+		curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
 		curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteCallback);
 		curl_easy_setopt(curl,CURLOPT_WRITEDATA,&content);
 		curl_easy_setopt(curl,CURLOPT_USERAGENT,"Mozilla/5.0");
