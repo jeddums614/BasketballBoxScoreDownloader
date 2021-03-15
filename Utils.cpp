@@ -78,7 +78,7 @@ void Utils::Run(int teamId)
 		{
 			std::string link = matches.str(1);
 			std::smatch tmpmatch;
-			std::cout << link << std::endl; // debug statement
+			//std::cout << link << std::endl; // debug statement
 			if ((link.find("boxscore") != std::string::npos &&
 				link.find("women") == std::string::npos &&
 			    (link.find("path=mbb") != std::string::npos ||
