@@ -51,7 +51,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 
 			datestr = yearstr + "-" + match.str(1) + "-" + match.str(2);
 			// Exhibition check
-			if (datestr.compare("2019-11-05") < 0)
+			if (datestr.compare(startdate) < 0)
 			{
 				datestr = "";
 				break;
