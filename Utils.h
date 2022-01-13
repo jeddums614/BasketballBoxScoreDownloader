@@ -23,11 +23,12 @@ enum StatValType
 	TOTALPOSSESSIONS
 };
 
-enum BoxScoreFormatType {
+enum class BoxScoreFormatType {
 	ASPX,
 	XML,
 	DBML,
 	PDF,
+	HTML,
 	OTHER
 };
 

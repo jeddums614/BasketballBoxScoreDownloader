@@ -13,6 +13,7 @@
 #include "XmlBoxScore.h"
 #include "DbmlBoxScore.h"
 #include "PdfBoxScore.h"
+#include "HtmlBoxScore.h"
 #include <memory>
 #include <regex>
 #include <vector>
@@ -42,26 +43,30 @@ void Utils::Run(int teamId)
 	std::string baseurl = teaminfo[0];
 	std::string scheduleurl = teaminfo[1];
 	std::string teamname = teaminfo[2];
-	BoxScoreFormatType formatType = OTHER;
+	BoxScoreFormatType formatType = BoxScoreFormatType::OTHER;
 	if (teaminfo[3].compare("aspx") == 0)
 	{
-		formatType = ASPX;
+		formatType = BoxScoreFormatType::ASPX;
 	}
 	else if (teaminfo[3].compare("xml") == 0)
 	{
-		formatType = XML;
+		formatType = BoxScoreFormatType::XML;
 	}
 	else if (teaminfo[3].compare("dbml") == 0)
 	{
-		formatType = DBML;
+		formatType = BoxScoreFormatType::DBML;
 	}
 	else if (teaminfo[3].compare("pdf") == 0)
 	{
-		formatType = PDF;
+		formatType = BoxScoreFormatType::PDF;
+	}
+	else if (teaminfo[3].compare("html") == 0)
+	{
+		formatType = BoxScoreFormatType::HTML;
 	}
 	else
 	{
-		formatType = OTHER;
+		formatType = BoxScoreFormatType::OTHER;
 	}
 	std::string startdate = teaminfo[4];
 
@@ -90,13 +95,13 @@ void Utils::Run(int teamId)
 			 link.find("/mbkb/") != std::string::npos ||
 			 link.find("path=m_bkb") != std::string::npos ||
 			 link.find("m-baskbl") != std::string::npos)) ||
-			(formatType == PDF && link.find(".pdf") != std::string::npos))
+			(formatType == BoxScoreFormatType::PDF && link.find(".pdf") != std::string::npos))
 		{
 			if (link.substr(0,4).compare("http") == 0)
 			{
 				if (std::find(boxscorelinks.begin(),boxscorelinks.end(),link) == boxscorelinks.end())
 				{
-					if (formatType != PDF) {
+					if (formatType != BoxScoreFormatType::PDF) {
 						boxscorelinks.push_back(link);
 					}
 					else {
@@ -117,7 +122,7 @@ void Utils::Run(int teamId)
 				{
 					if (std::find(boxscorelinks.begin(),boxscorelinks.end(),baseurl+link) == boxscorelinks.end())
 					{
-						if (formatType != PDF) {
+						if (formatType != BoxScoreFormatType::PDF) {
 							boxscorelinks.push_back(baseurl+link);
 						}
 						else {
@@ -136,7 +141,7 @@ void Utils::Run(int teamId)
 				{
 					if (std::find(boxscorelinks.begin(),boxscorelinks.end(),baseurl+"/"+link) == boxscorelinks.end())
 					{
-						if (formatType != PDF) {
+						if (formatType != BoxScoreFormatType::PDF) {
 							boxscorelinks.push_back(baseurl + "/" + link);
 						}
 						else {
@@ -160,7 +165,7 @@ void Utils::Run(int teamId)
 	if (boxscorelinks.size() == 0)
 	{
 		switch (formatType) {
-			case DBML:
+			case BoxScoreFormatType::DBML:
 			{
 				scit = schedcontent.cbegin();
 				std::regex bslinkregex("<a href=\"([A-Za-z0-9.\\/&_=?; ]+)\">Box score<\\/a>",std::regex_constants::icase);
@@ -196,7 +201,7 @@ void Utils::Run(int teamId)
 				break;
 			}
 
-			case PDF:
+			case BoxScoreFormatType::PDF:
 			{
 				scit = schedcontent.cbegin();
 				std::regex bslinkregex("<a href=\"([A-Za-z0-9.\\/:&_=?; -]+)\" target=\"_blank\">*\n *[a-z\"=>]*Box Score \\(PDF\\)",std::regex_constants::icase | std::regex_constants::extended);
@@ -240,20 +245,24 @@ void Utils::Run(int teamId)
 	std::unique_ptr<IBoxScore> boxScoreObj = nullptr;
 	switch (formatType)
 	{
-	case ASPX:
+	case BoxScoreFormatType::ASPX:
 		boxScoreObj = std::make_unique<AspxBoxScore>();
 		break;
 
-	case DBML:
+	case BoxScoreFormatType::DBML:
 		boxScoreObj = std::make_unique<DbmlBoxScore>();
 		break;
 
-	case XML:
+	case BoxScoreFormatType::XML:
 		boxScoreObj = std::make_unique<XmlBoxScore>();
 		break;
 
-	case PDF:
+	case BoxScoreFormatType::PDF:
 		boxScoreObj = std::make_unique<PdfBoxScore>();
+		break;
+
+	case BoxScoreFormatType::HTML:
+		boxScoreObj = std::make_unique<HtmlBoxScore>();
 		break;
 
 	default:
