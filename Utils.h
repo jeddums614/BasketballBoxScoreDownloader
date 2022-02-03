@@ -24,12 +24,13 @@ enum StatValType
 };
 
 enum class BoxScoreFormatType {
+	NONE,
 	ASPX,
 	XML,
 	DBML,
 	PDF,
 	HTML,
-	OTHER
+	SPORTSREF
 };
 
 class Utils

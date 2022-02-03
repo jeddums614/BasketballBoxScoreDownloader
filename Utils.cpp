@@ -14,6 +14,7 @@
 #include "DbmlBoxScore.h"
 #include "PdfBoxScore.h"
 #include "HtmlBoxScore.h"
+#include "SportsRefBoxScore.h"
 #include <memory>
 #include <regex>
 #include <vector>
@@ -43,7 +44,7 @@ void Utils::Run(int teamId)
 	std::string baseurl = teaminfo[0];
 	std::string scheduleurl = teaminfo[1];
 	std::string teamname = teaminfo[2];
-	BoxScoreFormatType formatType = BoxScoreFormatType::OTHER;
+	BoxScoreFormatType formatType = BoxScoreFormatType::NONE;
 	if (teaminfo[3].compare("aspx") == 0)
 	{
 		formatType = BoxScoreFormatType::ASPX;
@@ -64,9 +65,13 @@ void Utils::Run(int teamId)
 	{
 		formatType = BoxScoreFormatType::HTML;
 	}
+	else if (teaminfo[3].compare("sportsref") == 0)
+	{
+		formatType = BoxScoreFormatType::SPORTSREF;
+	}
 	else
 	{
-		formatType = BoxScoreFormatType::OTHER;
+		formatType = BoxScoreFormatType::NONE;
 	}
 	std::string startdate = teaminfo[4];
 
@@ -95,7 +100,8 @@ void Utils::Run(int teamId)
 			 link.find("/mbkb/") != std::string::npos ||
 			 link.find("path=m_bkb") != std::string::npos ||
 			 link.find("m-baskbl") != std::string::npos)) ||
-			(formatType == BoxScoreFormatType::PDF && link.find(".pdf") != std::string::npos))
+			(formatType == BoxScoreFormatType::PDF && link.find(".pdf") != std::string::npos) ||
+			(formatType == BoxScoreFormatType::SPORTSREF))
 		{
 			if (link.substr(0,4).compare("http") == 0)
 			{
@@ -263,6 +269,10 @@ void Utils::Run(int teamId)
 
 	case BoxScoreFormatType::HTML:
 		boxScoreObj = std::make_unique<HtmlBoxScore>();
+		break;
+
+	case BoxScoreFormatType::SPORTSREF:
+		boxScoreObj = std::make_unique<SportsRefBoxScore>();
 		break;
 
 	default:
