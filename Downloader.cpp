@@ -25,7 +25,7 @@ std::string Downloader::GetContent(const std::string & url)
 		curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
 		curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteCallback);
 		curl_easy_setopt(curl,CURLOPT_WRITEDATA,&content);
-		curl_easy_setopt(curl,CURLOPT_USERAGENT,"Mozilla/5.0");
+		curl_easy_setopt(curl,CURLOPT_USERAGENT,"'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'");
 		curl_easy_setopt(curl,CURLOPT_FOLLOWLOCATION,1);
 	    CURLcode res = curl_easy_perform(curl);
 	    if (res != CURLE_OK)

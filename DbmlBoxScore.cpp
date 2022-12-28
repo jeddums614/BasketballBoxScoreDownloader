@@ -12,6 +12,7 @@
 #include <regex>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 
 std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
 {

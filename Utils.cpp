@@ -20,6 +20,7 @@
 #include <vector>
 #include <iostream>
 #include <thread>
+#include <array>
 
 std::string Utils::exec(const std::string & cmd) {
     std::array<char, 128> buffer;
@@ -81,8 +82,11 @@ void Utils::Run(int teamId)
 	std::string schedcontent = Downloader::GetContent(scheduleurl);
 
 	std::vector<std::string> boxscorelinks;
+
 	std::string linkcommand = "google-chrome --headless --dump-dom '"+scheduleurl+"'";
 	schedcontent = Utils::exec(linkcommand);
+
+	//std::cout << schedcontent << std::endl; // debug statement
 
 	std::string::const_iterator scit(schedcontent.cbegin());
 	while (std::regex_search(scit,schedcontent.cend(),matches,linkregex))
@@ -118,6 +122,10 @@ void Utils::Run(int teamId)
 							std::size_t pos = link.find("//");
 
 							link.insert(pos+2,"s3.amazonaws.com/");
+							boxscorelinks.push_back(link);
+						}
+						else {
+							boxscorelinks.push_back(link);
 						}
 					}
 				}

@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <map>
 #include <regex>
+#include <cstring>
 
 std::optional<std::pair<Stats,Stats>> SportsRefBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
 {

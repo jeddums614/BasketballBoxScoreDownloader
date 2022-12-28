@@ -9,6 +9,7 @@
 #include "Utils.h"
 #include <iostream>
 #include <regex>
+#include <iterator>
 
 std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
 {
