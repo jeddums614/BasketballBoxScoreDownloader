@@ -23,17 +23,21 @@ int main(int argc, char** argv)
 		numThreads = sysconf(_SC_NPROCESSORS_ONLN);
 	}
 
-	std::string numTeamQuery = "select count(*) from team";
+	std::string numTeamQuery = "select id from team";
 	std::vector<std::vector<std::string>> numRes = DBWrapper::GetResults(numTeamQuery);
-
-	int numTeams = std::stoi(numRes[0][0]);
 
 	ThreadPool tp;
 	std::vector<std::future<void>> results;
 
-	for (int i = 0; i < numTeams; ++i) {
-		std::cout << "passing " << i+1 << " as parameter" << std::endl;
-	    results.emplace_back(tp.enqueue([i](){Utils::Run(i+1);}));
+	for (std::vector<std::string> res : numRes) {
+		try {
+			int i = std::stoi(res[0]);
+			std::cout << "passing " << i << " as parameter" << std::endl;
+		    results.emplace_back(tp.enqueue([i](){Utils::Run(i);}));
+		}
+		catch(...) {
+			std::cout << "error with stoi" << std::endl;
+		}
 	}
 
 	for (auto& res : results) {
