@@ -260,18 +260,6 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 			switch (numvalsfound)
 			{
 			case 1:
-				//OREB
-				if (totallabelcount == 1)
-				{
-					awaystatline["OREB"] = tmp2.str(1);
-				}
-				else if (totallabelcount == 2)
-				{
-					homestatline["OREB"] = tmp2.str(1);
-				}
-				break;
-
-			case 3:
 				// Total rebounds
 				if (totallabelcount == 1)
 				{
@@ -283,7 +271,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 				}
 				break;
 
-			case 5:
+			case 3:
 				// Team points
 				if (totallabelcount == 1)
 				{
@@ -295,7 +283,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 				}
 				break;
 
-			case 7:
+			case 5:
 			    // turnovers
 				if (totallabelcount == 1)
 				{
