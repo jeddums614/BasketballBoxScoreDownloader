@@ -86,6 +86,10 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			std::regex splitregex("\\s+|\\-");
 			std::vector<std::string> statparts{std::sregex_token_iterator(line.begin(), line.end(), splitregex, -1),
 				  std::sregex_token_iterator()};
+			if (!statparts.empty() && statparts[0].empty())
+			{
+				statparts.erase(statparts.begin());
+			}
 			std::copy(statparts.begin(),statparts.end(),std::ostream_iterator<std::string>(std::cout,","));
 			std::cout << std::endl;
 			std::cout << statparts.size() << std::endl;
