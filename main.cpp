@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 		numThreads = sysconf(_SC_NPROCESSORS_ONLN);
 	}
 
-	std::string numTeamQuery = "select id from team";
+	std::string numTeamQuery = "select id from team where id in (330)";
 	std::vector<std::vector<std::string>> numRes = DBWrapper::GetResults(numTeamQuery);
 
 	ThreadPool tp;
