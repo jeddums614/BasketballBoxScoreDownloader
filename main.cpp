@@ -10,6 +10,7 @@
 #include <vector>
 #include <unistd.h>
 #include <thread>
+#include <sstream>
 #include "Utils.h"
 #include "ThreadPool.h"
 #include "DbWrapper.h"
@@ -23,8 +24,23 @@ int main(int argc, char** argv)
 		numThreads = sysconf(_SC_NPROCESSORS_ONLN);
 	}
 
-	std::string numTeamQuery = "select id from team";
-	std::vector<std::vector<std::string>> numRes = DBWrapper::GetResults(numTeamQuery);
+    std::stringstream numTeamQuery;
+    numTeamQuery << "select id from team";
+	if (argc > 1)
+	{
+		numTeamQuery << " where id in (";
+		for (int i = 1; i < argc; ++i)
+		{
+			if (i > 1)
+			{
+				numTeamQuery << ",";
+			}
+
+			numTeamQuery << argv[i];
+		}
+		numTeamQuery << ")";
+	}
+	std::vector<std::vector<std::string>> numRes = DBWrapper::GetResults(numTeamQuery.str());
 
 	ThreadPool tp;
 	std::vector<std::future<void>> results;
