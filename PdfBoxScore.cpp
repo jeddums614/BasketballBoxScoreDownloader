@@ -38,7 +38,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 	{
 		//std::cout << line << std::endl;
 		std::smatch match;
-		if (std::regex_search(line,match,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})")))
+		if (std::regex_search(line,match,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})")) || std::regex_search(line,match,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})")))
 		{
 			std::string monthstr = match.str(1);
 			std::string daystr = match.str(2);
@@ -50,7 +50,21 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			std::string yearstr = std::to_string(yearval);
 
-			datestr = yearstr + "-" + match.str(1) + "-" + match.str(2);
+			datestr = yearstr + "-";
+
+			int monthval = std::stoi(monthstr);
+			if (monthval < 10)
+			{
+				datestr += "0";
+			}
+			datestr += std::to_string(monthval) + "-";
+
+			int dayval = std::stoi(daystr);
+			if (dayval < 10)
+			{
+				datestr += "0";
+			}
+			datestr += std::to_string(dayval);
 			// Exhibition check
 			if (datestr.compare(startdate) < 0)
 			{
