@@ -93,6 +93,18 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			//std::cout << "\"" << team1 << "\"" << "," << "\"" << team2 << "\"" << std::endl;
 		}
+		else if (std::regex_search(line,match,std::regex("VISITORS: ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)",std::regex_constants::icase)) && team1.empty())
+		{
+			team1 = match.str(1);
+			awaystatline["TEAM"] = team1;
+			awayteam.SetTeamName(team1);
+		}
+		else if (std::regex_search(line,match,std::regex("HOME TEAM: ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)",std::regex_constants::icase)) && team2.empty())
+		{
+			team2 = match.str(1);
+			homestatline["TEAM"] = team2;
+			hometeam.SetTeamName(team2);
+		}
 		else if (std::regex_search(line,match,std::regex("Totals",std::regex_constants::icase)) && !team1.empty() && !team2.empty())
 		{
 			++totallabelcount;
