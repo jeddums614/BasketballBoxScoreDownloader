@@ -17,6 +17,7 @@
 std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string & url, const std::string & startdate)
 {
 	std::string bscontent = Downloader::GetContent(url);
+	//std::cout << bscontent << std::endl;
 	std::istringstream iss{bscontent};
 	std::string line;
 	bool totalfound = false;
@@ -33,7 +34,11 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 	int numhyphensfound = 0;
 	while (std::getline(iss,line))
 	{
-		if (std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})")) && datestr.empty())
+		if ((std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase)) ||
+			 std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase)) ||
+			 std::regex_search(line,tmp2,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase))) && datestr.empty())
+		//if ((std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})",std::regex_constants::icase)) || std::regex_search(line,tmp2,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})",std::regex_constants::icase))) && datestr.empty()) // SFA
+		//if (std::regex_search(line,tmp2,std::regex("^(\\d{2})(\\d{2})(\\d{2}) (Noon|[0-9:]+)",std::regex_constants::icase)))
 		{
 		    int year = std::stoi(tmp2.str(3));
 			if (year < 2000)
@@ -41,21 +46,52 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 			    year += 2000;
 			}
 
-			datestr = std::to_string(year) + "-" + tmp2.str(1) + "-" + tmp2.str(2);
+			int month = std::stoi(tmp2.str(1));
+
+			datestr = std::to_string(year) + "-";
+			if (month < 10)
+			{
+				datestr += "0";
+			}
+			datestr += std::to_string(month) + "-";
+
+			int day = std::stoi(tmp2.str(2));
+			if (day < 10)
+			{
+				datestr += "0";
+			}
+			datestr += std::to_string(day);
+
 			// Exhibition check
+			//std::cout << datestr << std::endl;
 			if (datestr.compare(startdate) < 0)
 			{
 				datestr = "";
 				break;
 			}
 		}
-		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) && team1.empty() && team2.empty())
+		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()`'?_#\\/,\\[\\]; ]+)")) && team1.empty() && team2.empty())
 		{
 			team1 = tmp2.str(1);
 			awaystatline["TEAM"] = team1;
 			team2 = tmp2.str(2);
+			//std::cout << team1 << "," << team2 << std::endl;
 			homestatline["TEAM"] = team2;
 			awayteam.SetTeamName(team1);
+			hometeam.SetTeamName(team2);
+		}
+		else if (std::regex_search(line,tmp2,std::regex("VISITORS:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team1.empty())
+		{
+			team1 = tmp2.str(1);
+			awaystatline["TEAM"] = team1;
+			std::cout << team1 << std::endl;
+			awayteam.SetTeamName(team1);
+		}
+		else if (std::regex_search(line,tmp2,std::regex("HOME TEAM:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team2.empty())
+		{
+			team2 = tmp2.str(1);
+			homestatline["TEAM"] = team2;
+			std::cout << team2 << std::endl;
 			hometeam.SetTeamName(team2);
 		}
 		else if (std::regex_search(line,tmp2,std::regex(">Totals",std::regex_constants::icase)))
@@ -64,7 +100,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 			++totallabelcount;
 		}
 		else if (std::regex_search(line,tmp,std::regex("Totals\\.\\.")) &&
-				 std::regex_search(line,tmp2,std::regex("(\\d{1,3})-(\\d{1,3})")))
+				 (std::regex_search(line,tmp2,std::regex("(\\d{1,3})-(\\d{1,3})")) || std::regex_search(line,tmp2,std::regex("(\\d{1,3})"))))
 		{
 		    ++totallabelcount;
 			if (totallabelcount < 3)
@@ -121,20 +157,11 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 							}
 							break;
 
-						default:
-							break;
-						}
-					}
-					else if (std::regex_search(lp,value,std::regex("(\\d{1,3})")))
-					{
-					    ++numvalsfound;
-						switch (numvalsfound)
-					    {
-						case 1:
-						    //OREB
+						case 4:
+							//OREB-DREB
 							if (totallabelcount == 1)
 							{
-							    awaystatline["OREB"] = value.str(1);
+								awaystatline["OREB"] = value.str(1);
 							}
 							else if (totallabelcount == 2)
 							{
@@ -142,39 +169,196 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 							}
 							break;
 
-						case 3:
-							// Total rebounds
-							if (totallabelcount == 1)
+						default:
+							break;
+						}
+					}
+					else if (std::regex_search(lp,value,std::regex("(\\d{1,3})")))
+					{
+					    ++numvalsfound;
+					    //std::cout << "," << numvalsfound << "," << numhyphensfound << std::endl;
+						switch (numvalsfound)
+					    {
+						case 1:
+							if (numhyphensfound > 0)
 							{
-							    awaystatline["REB"] = value.str(1);
+							    //OREB
+								if (totallabelcount == 1)
+								{
+								    awaystatline["OREB"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["OREB"] = value.str(1);
+								}
 							}
-							else if (totallabelcount == 2)
+							else
 							{
-								homestatline["REB"] = value.str(1);
+							    //FGM
+								if (totallabelcount == 1)
+								{
+								    awaystatline["FGM"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["FGM"] = value.str(1);
+								}
+							}
+							break;
+
+						case 2:
+							if (numhyphensfound == 0)
+							{
+							    //FGM
+								if (totallabelcount == 1)
+								{
+								    awaystatline["FGA"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["FGA"] = value.str(1);
+								}
+							}
+							break;
+
+						case 3:
+							if (numhyphensfound > 0)
+							{
+								// Total rebounds
+								if (totallabelcount == 1)
+								{
+								    awaystatline["REB"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["REB"] = value.str(1);
+								}
+							}
+							else
+							{
+								// Total rebounds
+								if (totallabelcount == 1)
+								{
+								    awaystatline["3PT"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["3PT"] = value.str(1);
+								}
 							}
 							break;
 
 						case 5:
-							// Team points
-							if (totallabelcount == 1)
-						    {
-							    awaystatline["PTS"] = value.str(1);
-							}
-							else if (totallabelcount == 2)
+							if (numhyphensfound > 0)
 							{
-								homestatline["PTS"] = value.str(1);
+								// Team points
+								if (totallabelcount == 1)
+							    {
+								    awaystatline["PTS"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["PTS"] = value.str(1);
+								}
+							}
+							else
+							{
+								// FTM
+								if (totallabelcount == 1)
+							    {
+								    awaystatline["FTM"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["FTM"] = value.str(1);
+								}
+							}
+							break;
+
+						case 6:
+							if (numhyphensfound == 0)
+							{
+								// Team points
+								if (totallabelcount == 1)
+							    {
+								    awaystatline["FTA"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["FTA"] = value.str(1);
+								}
 							}
 							break;
 
 						case 7:
-							// turnovers
-							if (totallabelcount == 1)
+							if (numhyphensfound > 0)
 							{
-							    awaystatline["TO"] = value.str(1);
+								// turnovers
+								if (totallabelcount == 1)
+								{
+								    awaystatline["TO"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["TO"] = value.str(1);
+								}
 							}
-							else if (totallabelcount == 2)
+							else
 							{
-								homestatline["TO"] = value.str(1);
+							    //OREB
+								if (totallabelcount == 1)
+								{
+								    awaystatline["OREB"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["OREB"] = value.str(1);
+								}
+							}
+							break;
+
+						case 9:
+							if (numhyphensfound == 0)
+							{
+							    //OREB
+								if (totallabelcount == 1)
+								{
+								    awaystatline["REB"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["REB"] = value.str(1);
+								}
+							}
+							break;
+
+						case 11:
+							if (numhyphensfound == 0)
+							{
+								// Team points
+								if (totallabelcount == 1)
+							    {
+								    awaystatline["PTS"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["PTS"] = value.str(1);
+								}
+							}
+							break;
+
+						case 13:
+							if (numhyphensfound == 0)
+							{
+								// turnovers
+								if (totallabelcount == 1)
+								{
+								    awaystatline["TO"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["TO"] = value.str(1);
+								}
 							}
 							break;
 
@@ -258,46 +442,241 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		{
 			++numvalsfound;
 			switch (numvalsfound)
-			{
+		    {
 			case 1:
-				// Total rebounds
-				if (totallabelcount == 1)
+				if (numhyphensfound > 0)
 				{
-				    awaystatline["REB"] = tmp2.str(1);
+					if (numhyphensfound < 4)
+					{
+					    //OREB
+						if (totallabelcount == 1)
+						{
+						    awaystatline["OREB"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["OREB"] = tmp2.str(1);
+						}
+					}
+					else
+					{
+						// Total rebounds
+						if (totallabelcount == 1)
+						{
+						    awaystatline["REB"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["REB"] = tmp2.str(1);
+						}
+					}
 				}
-				else if (totallabelcount == 2)
+				else
 				{
-					homestatline["REB"] = tmp2.str(1);
+				    //FGM
+					if (totallabelcount == 1)
+					{
+					    awaystatline["FGM"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["FGM"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 2:
+				if (numhyphensfound == 0)
+				{
+				    //FGM
+					if (totallabelcount == 1)
+					{
+					    awaystatline["FGA"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["FGA"] = tmp2.str(1);
+					}
 				}
 				break;
 
 			case 3:
-				// Team points
-				if (totallabelcount == 1)
+				if (numhyphensfound > 0)
 				{
-					awaystatline["PTS"] = tmp2.str(1);
+					if (numhyphensfound < 4)
+					{
+						// Total rebounds
+						if (totallabelcount == 1)
+						{
+						    awaystatline["REB"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["REB"] = tmp2.str(1);
+						}
+					}
+					else
+					{
+						// Team points
+						if (totallabelcount == 1)
+					    {
+						    awaystatline["PTS"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["PTS"] = tmp2.str(1);
+						}
+					}
 				}
-				else if (totallabelcount == 2)
+				else
 				{
-					homestatline["PTS"] = tmp2.str(1);
+					// Total rebounds
+					if (totallabelcount == 1)
+					{
+					    awaystatline["3PT"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["3PT"] = tmp2.str(1);
+					}
 				}
 				break;
 
 			case 5:
-			    // turnovers
-				if (totallabelcount == 1)
+				if (numhyphensfound > 0)
 				{
-					awaystatline["TO"] = tmp2.str(1);
+					if (numhyphensfound < 4)
+					{
+						// Team points
+						if (totallabelcount == 1)
+					    {
+						    awaystatline["PTS"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["PTS"] = tmp2.str(1);
+						}
+					}
+					else
+					{
+						// Team points
+						if (totallabelcount == 1)
+					    {
+						    awaystatline["TO"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["TO"] = tmp2.str(1);
+						}
+					}
 				}
-				else if (totallabelcount == 2)
+				else
 				{
-					homestatline["TO"] = tmp2.str(1);
+					// FTM
+					if (totallabelcount == 1)
+				    {
+					    awaystatline["FTM"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["FTM"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 6:
+				if (numhyphensfound == 0)
+				{
+					// Team points
+					if (totallabelcount == 1)
+				    {
+					    awaystatline["FTA"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["FTA"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 7:
+				if (numhyphensfound > 0)
+				{
+					if (numhyphensfound < 4)
+					{
+						// turnovers
+						if (totallabelcount == 1)
+						{
+						    awaystatline["TO"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["TO"] = tmp2.str(1);
+						}
+					}
+				}
+				else
+				{
+				    //OREB
+					if (totallabelcount == 1)
+					{
+					    awaystatline["OREB"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["OREB"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 9:
+				if (numhyphensfound == 0)
+				{
+				    //OREB
+					if (totallabelcount == 1)
+					{
+					    awaystatline["REB"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["REB"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 11:
+				if (numhyphensfound == 0)
+				{
+					// Team points
+					if (totallabelcount == 1)
+				    {
+					    awaystatline["PTS"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["PTS"] = tmp2.str(1);
+					}
+				}
+				break;
+
+			case 13:
+				if (numhyphensfound == 0)
+				{
+					// turnovers
+					if (totallabelcount == 1)
+					{
+					    awaystatline["TO"] = tmp2.str(1);
+					}
+					else if (totallabelcount == 2)
+					{
+						homestatline["TO"] = tmp2.str(1);
+					}
 				}
 				break;
 
 			default:
 				break;
-		    }
+			}
 		}
 	}
 
