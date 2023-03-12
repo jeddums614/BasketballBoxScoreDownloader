@@ -76,15 +76,42 @@ void Utils::Run(int teamId)
 	}
 	std::string startdate = teaminfo[4];
 
-	std::regex linkregex("href=\"([A-Za-z0-9\\/:.,?=&;_ -]+)\"");
+	std::string regexstr = "";
+
+	if (formatType == BoxScoreFormatType::PDF || teamname.find("ETSU") != std::string::npos)
+	{
+		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\" target";
+	}
+	else if (teamname.compare("UMES") == 0 || teamname.find("Barbara") != std::string::npos || teamname.find("Bryant") != std::string::npos || (teamname.find("UConn") != std::string::npos && formatType == BoxScoreFormatType::DBML) || (teamname.find("Penn St") != std::string::npos && formatType == BoxScoreFormatType::DBML))
+	{
+		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\"[ ]+class";
+	}
+	else if (teamname.compare("Rutgers") == 0)
+	{
+		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\" oldlink";
+	}
+	else if (teamname.compare("Arizona") == 0)
+	{
+		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\" aria";
+	}
+	else
+	{
+		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\"";
+	}
+	//std::regex linkregex("href=\"([A-Za-z0-9\\/:.,?=&;_ -~]+)\"");
+	//std::regex linkregex("href=\"([A-Za-z0-9\\/:.,?=&;_ -~]+)\"[ ]+class"); // UMES, UCSB
+	//std::regex linkregex("href=\"([A-Za-z0-9\\/:.,?=&;_ -~]+)\" oldlink"); // Rutgers
+	//std::regex linkregex("href=\"([A-Za-z0-9\\/:.,?=&;_ -~]+)\" target"); // for pdfs, ETSU
+
+	std::regex linkregex(regexstr);
 	std::smatch matches;
 
 	std::string schedcontent = Downloader::GetContent(scheduleurl);
 
 	std::vector<std::string> boxscorelinks;
 
-	std::string linkcommand = "google-chrome --headless --dump-dom '"+scheduleurl+"'";
-	schedcontent = Utils::exec(linkcommand);
+	//std::string linkcommand = "google-chrome --headless --dump-dom '"+scheduleurl+"'";
+	//schedcontent = Utils::exec(linkcommand);
 
 	//std::cout << schedcontent << std::endl; // debug statement
 
@@ -105,7 +132,7 @@ void Utils::Run(int teamId)
 			 link.find("path=m_bkb") != std::string::npos ||
 			 link.find("m-baskbl") != std::string::npos)) ||
 			(formatType == BoxScoreFormatType::PDF && link.find(".pdf") != std::string::npos) ||
-			(formatType == BoxScoreFormatType::SPORTSREF))
+			(formatType == BoxScoreFormatType::SPORTSREF) || (formatType == BoxScoreFormatType::DBML/* && link.find("Stats") != std::string::npos*/) || (formatType == BoxScoreFormatType::XML && (link.find(".xml") != std::string::npos || link.find(".XML") != std::string::npos)))
 		{
 			if (link.substr(0,4).compare("http") == 0)
 			{
@@ -122,9 +149,19 @@ void Utils::Run(int teamId)
 							std::size_t pos = link.find("//");
 
 							link.insert(pos+2,"s3.amazonaws.com/");
+
+							std::size_t slashpos = link.rfind("//");
+
+							if (slashpos != std::string::npos && slashpos > 7)
+							{
+								link.erase(slashpos,1);
+							}
+
+							std::cout << link << std::endl;
 							boxscorelinks.push_back(link);
 						}
 						else {
+							std::cout << link << std::endl;
 							boxscorelinks.push_back(link);
 						}
 					}
@@ -146,7 +183,18 @@ void Utils::Run(int teamId)
 							else if (link.find("/documents/") != std::string::npos) {
 								std::size_t pos = baseurl.find("//");
 
-								boxscorelinks.push_back(baseurl.substr(0,pos+2)+"s3.amazonaws.com/"+baseurl.substr(pos+2)+link);
+								std::string newlink = baseurl.substr(0,pos+2)+"s3.amazonaws.com/"+baseurl.substr(pos+2)+link;
+
+								std::size_t slashpos = newlink.rfind("//");
+
+								if (slashpos != std::string::npos && slashpos > 7)
+								{
+									newlink.erase(slashpos,1);
+								}
+
+								std::cout << newlink << std::endl;
+
+								boxscorelinks.push_back(newlink);
 							}
 						}
 					}
@@ -294,6 +342,8 @@ void Utils::Run(int teamId)
 	}
 
 	int numgames = 0;
+	//boxscorelinks = {"https://vucommodores.com/wp-content/uploads/2020/04/2009-10-MBB-All-Boxes.pdf"};
+	//boxScoreObj = std::make_unique<PdfBoxScore>();
 	for (std::string bslink : boxscorelinks)
 	{
 		//std::cout << "boxscore link: " << bslink << std::endl;
