@@ -30,7 +30,7 @@ std::optional<std::pair<Stats,Stats>> SportsRefBoxScore::ProcessUrl(const std::s
 	int numvalsfound = 0;
 
 	while (std::getline(iss, line)) {
-		if (std::regex_search(line, tmp, std::regex("<title>([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs\\.* ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) Box Score, (\\S+) (\\d{1,2}), (\\d{2,4}) \\|"))) {
+		if (std::regex_search(line, tmp, std::regex("<title>([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs\\.* ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) Box Score \\(Men\\), (\\S+) (\\d{1,2}), (\\d{2,4}) \\|"))) {
 			std::string team1 = tmp.str(1);
 			std::string team2 = tmp.str(2);
 			awaystatline["TEAM"] = team1;
