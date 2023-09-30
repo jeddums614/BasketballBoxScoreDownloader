@@ -73,12 +73,12 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()`'?_#\\/,\\[\\]; ]+)")) && team1.empty() && team2.empty())
 		{
 			team1 = tmp2.str(1);
-			awaystatline["TEAM"] = team1;
+			awaystatline["TEAM"] = std::regex_replace(team1, std::regex("^\\s+"), "");;
 			team2 = tmp2.str(2);
 			//std::cout << team1 << "," << team2 << std::endl;
-			homestatline["TEAM"] = team2;
-			awayteam.SetTeamName(team1);
-			hometeam.SetTeamName(team2);
+			homestatline["TEAM"] = std::regex_replace(team2,std::regex(" \\(\\d.*"), "");;
+			awayteam.SetTeamName(awaystatline["TEAM"]);
+			hometeam.SetTeamName(homestatline["TEAM"]);
 		}
 		else if (std::regex_search(line,tmp2,std::regex("VISITORS:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team1.empty())
 		{
