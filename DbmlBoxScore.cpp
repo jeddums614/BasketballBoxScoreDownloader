@@ -70,36 +70,118 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 				break;
 			}
 		}
+		else if (std::regex_search(line,tmp2,std::regex(">*(\\S+) (\\d{1,2}), (\\d{2,4})")) && datestr.empty())
+		{
+			std::string tmpmon = tmp2.str(1);
+			std::transform(tmpmon.begin(),tmpmon.end(),tmpmon.begin(),::tolower);
+
+			std::string monthstr = "";
+			if (tmpmon.compare("jan.") == 0)
+			{
+				monthstr = "01";
+			}
+			else if (tmpmon.compare("feb.") == 0)
+			{
+				monthstr = "02";
+			}
+			else if (tmpmon.compare("mar.") == 0)
+			{
+				monthstr = "03";
+			}
+			else if (tmpmon.compare("apr.") == 0)
+			{
+				monthstr = "04";
+			}
+			else if (tmpmon.compare("may") == 0)
+			{
+				monthstr = "05";
+			}
+			else if (tmpmon.compare("jun") == 0)
+			{
+				monthstr = "06";
+			}
+			else if (tmpmon.compare("jul") == 0)
+			{
+				monthstr = "07";
+			}
+			else if (tmpmon.compare("aug") == 0)
+			{
+				monthstr = "08";
+			}
+			else if (tmpmon.compare("sept") == 0)
+			{
+				monthstr = "09";
+			}
+			else if (tmpmon.compare("oct") == 0)
+			{
+				monthstr = "10";
+			}
+			else if (tmpmon.compare("nov.") == 0)
+			{
+				monthstr = "11";
+			}
+			else if (tmpmon.compare("dec.") == 0)
+			{
+				monthstr = "12";
+			}
+			else
+			{
+				std::cout << "invalid month " << tmpmon << std::endl;
+				datestr = "";
+				continue;
+			}
+
+			int day = std::stoi(tmp2.str(2));
+			std::string daystr = "";
+			if (day < 10)
+			{
+				daystr += "0";
+			}
+			daystr += std::to_string(day);
+			int year = std::stoi(tmp2.str(3));
+			if (year < 2000)
+			{
+				year += 2000;
+			}
+
+			datestr = std::to_string(year) + "-" + monthstr + "-" + daystr;
+			// Exhibition check
+			if (datestr.compare(startdate) < 0)
+			{
+				datestr = "";
+				break;
+			}
+		}
 		else if (std::regex_search(line,tmp2,std::regex("^([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()`'?_#\\/,\\[\\]; ]+)")) && team1.empty() && team2.empty())
 		{
 			team1 = tmp2.str(1);
-			awaystatline["TEAM"] = std::regex_replace(team1, std::regex("^\\s+"), "");;
+			awaystatline["TEAM"] = std::regex_replace(team1, std::regex("^\\s+"), "");
 			team2 = tmp2.str(2);
 			//std::cout << team1 << "," << team2 << std::endl;
-			homestatline["TEAM"] = std::regex_replace(team2,std::regex(" \\(\\d.*"), "");;
+			homestatline["TEAM"] = std::regex_replace(team2,std::regex(" \\(\\d.*"), "");
 			awayteam.SetTeamName(awaystatline["TEAM"]);
 			hometeam.SetTeamName(homestatline["TEAM"]);
 		}
 		else if (std::regex_search(line,tmp2,std::regex("VISITORS:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team1.empty())
 		{
 			team1 = tmp2.str(1);
-			awaystatline["TEAM"] = team1;
+			awaystatline["TEAM"] = std::regex_replace(team1,std::regex(" \\(*\\d.*"), "");
 			std::cout << team1 << std::endl;
-			awayteam.SetTeamName(team1);
+			awayteam.SetTeamName(awaystatline["TEAM"]);
 		}
 		else if (std::regex_search(line,tmp2,std::regex("HOME TEAM:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team2.empty())
 		{
 			team2 = tmp2.str(1);
-			homestatline["TEAM"] = team2;
+			homestatline["TEAM"] = std::regex_replace(team2,std::regex(" \\(*\\d.*"), "");
 			std::cout << team2 << std::endl;
-			hometeam.SetTeamName(team2);
+			hometeam.SetTeamName(homestatline["TEAM"]);
 		}
-		else if (std::regex_search(line,tmp2,std::regex(">Totals",std::regex_constants::icase)))
+		else if (std::regex_search(line,tmp2,std::regex(">Total",std::regex_constants::icase)))
 		{
 		    totalfound = true;
 			++totallabelcount;
 		}
-		else if (std::regex_search(line,tmp,std::regex("Totals\\.\\.")) &&
+		else if (std::regex_search(line,tmp,std::regex("Totals\\.*")) &&
 				 (std::regex_search(line,tmp2,std::regex("(\\d{1,3})-(\\d{1,3})")) || std::regex_search(line,tmp2,std::regex("(\\d{1,3})"))))
 		{
 		    ++totallabelcount;
@@ -380,6 +462,11 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		else if (std::regex_search(line,tmp2,std::regex(">(\\d{1,3})-(\\d{1,3})")) && totalfound)
 		{
 			++numhyphensfound;
+			/*std::cout << tmp2.str(1) << "," << tmp2.str(2) << "," << numhyphensfound << "," << totallabelcount << std::endl;
+			if (totallabelcount == 3)
+			{
+				totallabelcount = 2;
+			}*/
 			switch (numhyphensfound)
 			{
 			case 1:
@@ -441,6 +528,11 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		else if (std::regex_search(line,tmp2,std::regex(">(\\d{1,3})")) && totalfound)
 		{
 			++numvalsfound;
+			/*std::cout << tmp2.str(1) << "," << numvalsfound << "," << totallabelcount << std::endl;
+			if (totallabelcount == 3)
+			{
+				totallabelcount = 2;
+			}*/
 			switch (numvalsfound)
 		    {
 			case 1:
