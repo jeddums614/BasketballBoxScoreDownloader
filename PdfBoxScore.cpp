@@ -73,8 +73,90 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			//std::cout << datestr << std::endl;
 		}
+		else if (std::regex_search(line,match,std::regex("(\\S+) (\\d{1,2}), (\\d{2,4})")))
+		{
+			std::string tmpmon = match.str(1);
+			std::transform(tmpmon.begin(),tmpmon.end(),tmpmon.begin(),::tolower);
+
+			std::string monthstr = "";
+			if (tmpmon.compare("jan") == 0)
+			{
+				monthstr = "01";
+			}
+			else if (tmpmon.compare("feb") == 0)
+			{
+				monthstr = "02";
+			}
+			else if (tmpmon.compare("mar") == 0)
+			{
+				monthstr = "03";
+			}
+			else if (tmpmon.compare("apr") == 0)
+			{
+				monthstr = "04";
+			}
+			else if (tmpmon.compare("may") == 0)
+			{
+				monthstr = "05";
+			}
+			else if (tmpmon.compare("jun") == 0)
+			{
+				monthstr = "06";
+			}
+			else if (tmpmon.compare("jul") == 0)
+			{
+				monthstr = "07";
+			}
+			else if (tmpmon.compare("aug") == 0)
+			{
+				monthstr = "08";
+			}
+			else if (tmpmon.compare("sept") == 0)
+			{
+				monthstr = "09";
+			}
+			else if (tmpmon.compare("oct") == 0)
+			{
+				monthstr = "10";
+			}
+			else if (tmpmon.compare("nov") == 0)
+			{
+				monthstr = "11";
+			}
+			else if (tmpmon.compare("dec") == 0)
+			{
+				monthstr = "12";
+			}
+			else
+			{
+				std::cout << "invalid month" << std::endl;
+				std::exit(-111);
+			}
+
+			int day = std::stoi(match.str(2));
+			std::string daystr = "";
+			if (day < 10)
+			{
+				daystr += "0";
+			}
+			daystr += std::to_string(day);
+			int year = std::stoi(match.str(3));
+			if (year < 2000)
+			{
+				year += 2000;
+			}
+
+			datestr = std::to_string(year) + "-" + monthstr + "-" + daystr;
+			std::cout << datestr << std::endl;
+			// Exhibition check
+			if (datestr.compare(startdate) < 0)
+			{
+				datestr = "";
+				break;
+			}
+		}
 		else if ((std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) at ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) ||
-				  std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")))&&
+				  std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs\\.* ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")))&&
 				team1.empty() && team2.empty())
 		{
 			team1 = match.str(1);
