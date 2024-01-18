@@ -129,8 +129,8 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			else
 			{
-				std::cout << "invalid month" << std::endl;
-				std::exit(-111);
+				std::cout << "invalid month" << tmpmon << std::endl;
+				break;
 			}
 
 			int day = std::stoi(match.str(2));
