@@ -191,7 +191,8 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 		{
 			++totallabelcount;
 			numvalsfound = 0;
-			std::regex splitregex("\\s+|\\-");
+			// The two hyphens in this regex are different encodings (needed for some pdf's)
+			std::regex splitregex("\\s+|\\‐|\\-");
 			std::vector<std::string> statparts{std::sregex_token_iterator(line.begin(), line.end(), splitregex, -1),
 				  std::sregex_token_iterator()};
 			if (!statparts.empty() && statparts[0].empty())
