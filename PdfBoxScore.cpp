@@ -65,13 +65,13 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 				datestr += "0";
 			}
 			datestr += std::to_string(dayval);
+			//std::cout << datestr << std::endl;
 			// Exhibition check
 			if (datestr.compare(startdate) < 0)
 			{
 				datestr = "";
 				break;
 			}
-			//std::cout << datestr << std::endl;
 		}
 		else if (std::regex_search(line,match,std::regex("(\\S+) (\\d{1,2}), (\\d{2,4})")))
 		{
@@ -129,7 +129,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			}
 			else
 			{
-				std::cout << "invalid month" << tmpmon << std::endl;
+				std::cout << "invalid month " << tmpmon << std::endl;
 				break;
 			}
 
@@ -148,6 +148,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 
 			datestr = std::to_string(year) + "-" + monthstr + "-" + daystr;
 			std::cout << datestr << std::endl;
+
 			// Exhibition check
 			if (datestr.compare(startdate) < 0)
 			{
@@ -155,8 +156,8 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 				break;
 			}
 		}
-		else if ((std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) at ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) ||
-				  std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs\\.* ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")))&&
+		else if ((std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'`?_#\\/,\\[\\]; ]+) at ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)")) ||
+				  std::regex_search(line,match,std::regex("^\\s*([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+) vs\\.* ([A-Za-z0-9&.\\-()'`?_#\\/,\\[\\]; ]+)")))&&
 				team1.empty() && team2.empty())
 		{
 			team1 = match.str(1);
@@ -164,6 +165,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			awayteam.SetTeamName(team1);
 			team2 = match.str(2);
 			hometeam.SetTeamName(team2);
+			homestatline["TEAM"] = team2;
 			if (std::regex_search(team2,match,std::regex("([A-Za-z0-9&.\\-()'?_#\\/,\\[\\] ]+)\\s{2,}")))
 			{
 				team2 = match.str(1);
@@ -173,7 +175,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 				homestatline["TEAM"] = team2;
 				hometeam.SetTeamName(team2);
 			}
-			//std::cout << "\"" << team1 << "\"" << "," << "\"" << team2 << "\"" << std::endl;
+			std::cout << "\"" << team1 << "\"" << "," << "\"" << team2 << "\"" << std::endl;
 		}
 		else if (std::regex_search(line,match,std::regex("VISITORS: ([A-Za-z0-9&.\\-()'?_#\\/,\\[\\]; ]+)",std::regex_constants::icase)) && team1.empty())
 		{
