@@ -41,8 +41,16 @@ std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(const std::string
 				{
 					year += 2000;
 				}
+				datestr = std::to_string(year) + "-";
 
-				datestr = std::to_string(year) + "-" + datematch.str(1) + "-" + datematch.str(2);
+				int month = std::stoi(datematch.str(1));
+				if (month < 10)
+				{
+					datestr += "0";
+				}
+				datestr += std::to_string(month) + "-";
+
+				datestr += datematch.str(2);
 				// Exhibition check
 				if (datestr.compare(startdate) < 0)
 				{
@@ -154,6 +162,7 @@ std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(const std::string
 		awayteam.SetTotalRebounds(std::stod(awaystatline["REB"]));
 		awayteam.SetTotalFreeThrows(std::stod(awaystatline["FTM"]));
 		awayteam.SetTotalFreeThrowAttempts(std::stod(awaystatline["FTA"]));
+		awayteam.SetTotalMinutes(std::stod(awaystatline["MIN"]));
 
 		hometeam.SetTeamPoints(std::stod(homestatline["PTS"]));
 		hometeam.SetThreePointFieldGoals(std::stod(homestatline["3PT"]));
@@ -164,6 +173,7 @@ std::optional<std::pair<Stats,Stats>> AspxBoxScore::ProcessUrl(const std::string
 		hometeam.SetTotalRebounds(std::stod(homestatline["REB"]));
 		hometeam.SetTotalFreeThrows(std::stod(homestatline["FTM"]));
 		hometeam.SetTotalFreeThrowAttempts(std::stod(homestatline["FTA"]));
+		hometeam.SetTotalMinutes(std::stod(homestatline["MIN"]));
 		return std::make_pair(awayteam,hometeam);
 	}
 	else
