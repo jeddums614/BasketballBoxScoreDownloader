@@ -123,6 +123,16 @@ void Stats::SetTotalFreeThrowAttempts(double tfta)
 	totalfta = tfta;
 }
 
+double Stats::GetTotalMinutes()
+{
+	return totalminutes;
+}
+
+void Stats::SetTotalMinutes(double minutes)
+{
+	totalminutes = minutes;
+}
+
 std::ostream & operator << (std::ostream &out, const Stats &ts)
 {
 	out << ts.datestr << "," << ts.teamname << ","
@@ -130,6 +140,6 @@ std::ostream & operator << (std::ostream &out, const Stats &ts)
 		<< ts.totalfga << "," << ts.totalto << ","
 		<< ts.totaloffreb << "," << ts.totalreb << ","
 		<< ts.totalftm << "," << ts.totalfta << ","
-		<< ts.points;
+		<< ts.points << "," << ts.totalminutes;
 	return out;
 }

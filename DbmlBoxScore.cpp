@@ -7,6 +7,7 @@
 
 #include "DbmlBoxScore.h"
 #include "Downloader.h"
+#include "Utils.h"
 #include <map>
 #include <sstream>
 #include <regex>
@@ -36,7 +37,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 	{
 		if ((std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase)) ||
 			 std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase)) ||
-			 std::regex_search(line,tmp2,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase))) && datestr.empty())
+			 std::regex_search(line,tmp2,std::regex("(\\d{1,2})-[ ]*(\\d{1,2})-(\\d{2,4})[ ]+(Noon|[0-9:]+)",std::regex_constants::icase))) && datestr.empty())
 		//if ((std::regex_search(line,tmp2,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})",std::regex_constants::icase)) || std::regex_search(line,tmp2,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})",std::regex_constants::icase))) && datestr.empty()) // SFA
 		//if (std::regex_search(line,tmp2,std::regex("^(\\d{2})(\\d{2})(\\d{2}) (Noon|[0-9:]+)",std::regex_constants::icase)))
 		{
@@ -84,14 +85,14 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		{
 			team1 = tmp2.str(1);
 			awaystatline["TEAM"] = std::regex_replace(team1,std::regex(" \\(\\d.*"), "");
-			std::cout << awaystatline["TEAM"] << std::endl;
+			//std::cout << awaystatline["TEAM"] << std::endl;
 			awayteam.SetTeamName(awaystatline["TEAM"]);
 		}
 		else if (std::regex_search(line,tmp2,std::regex("HOME TEAM:[ ]+([A-Za-z0-9&.`\\-()'?_#\\/,\\[\\]; ]+)")) && team2.empty())
 		{
 			team2 = tmp2.str(1);
 			homestatline["TEAM"] = std::regex_replace(team2,std::regex(" \\(\\d.*"), "");
-			std::cout << homestatline["TEAM"] << std::endl;
+			//std::cout << homestatline["TEAM"] << std::endl;
 			hometeam.SetTeamName(homestatline["TEAM"]);
 		}
 		else if (std::regex_search(line,tmp2,std::regex(">Totals",std::regex_constants::icase)))
@@ -99,7 +100,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		    totalfound = true;
 			++totallabelcount;
 		}
-		else if (std::regex_search(line,tmp,std::regex("Totals\\.\\.")) &&
+		else if ((std::regex_search(line,tmp,std::regex("Totals\\.\\.",std::regex_constants::icase))/* || std::regex_search(line,tmp,std::regex("Totals",std::regex_constants::icase))*/) &&
 				 (std::regex_search(line,tmp2,std::regex("(\\d{1,3})-(\\d{1,3})")) || std::regex_search(line,tmp2,std::regex("(\\d{1,3})"))))
 		{
 		    ++totallabelcount;
@@ -176,7 +177,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 					else if (std::regex_search(lp,value,std::regex("(\\d{1,3})")))
 					{
 					    ++numvalsfound;
-					    //std::cout << "," << numvalsfound << "," << numhyphensfound << std::endl;
+					    //std::cout << "," << numvalsfound << "," << numhyphensfound << "," << value.str(1) << std::endl;
 						switch (numvalsfound)
 					    {
 						case 1:
@@ -317,6 +318,20 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 							}
 							break;
 
+						case 8:
+							if (numhyphensfound > 0)
+							{
+								if (totallabelcount == 1)
+								{
+									awaystatline["MIN"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["MIN"] = value.str(1);
+								}
+							}
+							break;
+
 						case 9:
 							if (numhyphensfound == 0)
 							{
@@ -328,6 +343,19 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 								else if (totallabelcount == 2)
 								{
 									homestatline["REB"] = value.str(1);
+								}
+							}
+							break;
+						case 10:
+							if (numhyphensfound > 0)
+							{
+								if (totallabelcount == 1)
+								{
+									awaystatline["MIN"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["MIN"] = value.str(1);
 								}
 							}
 							break;
@@ -358,6 +386,19 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 								else if (totallabelcount == 2)
 								{
 									homestatline["TO"] = value.str(1);
+								}
+							}
+							break;
+						case 16:
+							if (numhyphensfound == 0)
+							{
+								if (totallabelcount == 1)
+								{
+									awaystatline["MIN"] = value.str(1);
+								}
+								else if (totallabelcount == 2)
+								{
+									homestatline["MIN"] = value.str(1);
 								}
 							}
 							break;
@@ -629,6 +670,27 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 				}
 				break;
 
+			case 8:
+				if (numhyphensfound > 0)
+				{
+					if (numhyphensfound < 4)
+					{
+					}
+					else
+					{
+						// Team points
+						if (totallabelcount == 1)
+						{
+							awaystatline["MIN"] = tmp2.str(1);
+						}
+						else if (totallabelcount == 2)
+						{
+							homestatline["MIN"] = tmp2.str(1);
+						}
+					}
+				}
+				break;
+
 			case 9:
 				if (numhyphensfound == 0)
 				{
@@ -692,6 +754,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		awayteam.SetTotalRebounds(std::stod(awaystatline["REB"]));
 		awayteam.SetTotalFreeThrows(std::stod(awaystatline["FTM"]));
 		awayteam.SetTotalFreeThrowAttempts(std::stod(awaystatline["FTA"]));
+		awayteam.SetTotalMinutes(std::stod(awaystatline["MIN"]));
 
 		hometeam.SetDateString(datestr);
 		hometeam.SetTeamPoints(std::stod(homestatline["PTS"]));
@@ -703,6 +766,7 @@ std::optional<std::pair<Stats,Stats>> DbmlBoxScore::ProcessUrl(const std::string
 		hometeam.SetTotalRebounds(std::stod(homestatline["REB"]));
 		hometeam.SetTotalFreeThrows(std::stod(homestatline["FTM"]));
 		hometeam.SetTotalFreeThrowAttempts(std::stod(homestatline["FTA"]));
+		hometeam.SetTotalMinutes(std::stod(homestatline["MIN"]));
 		return std::make_pair(awayteam,hometeam);
 	}
 	else

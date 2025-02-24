@@ -35,6 +35,8 @@ public:
 	void SetTotalFreeThrowAttempts(double tfta);
 	double GetTeamPoints();
 	void SetTeamPoints(double pts);
+	double GetTotalMinutes();
+	void SetTotalMinutes(double minutes);
 	double CalcPossessions();
 
 	friend std::ostream & operator << (std::ostream &out, const Stats &ts);
@@ -50,6 +52,7 @@ private:
 	double totalftm;
 	double totalfta;
 	double points;
+	double totalminutes;
 };
 
 

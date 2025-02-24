@@ -38,7 +38,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 	{
 		//std::cout << line << std::endl;
 		std::smatch match;
-		if ((std::regex_search(line,match,std::regex("(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2,4})")) || std::regex_search(line,match,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})"))) && (datestr.empty()))
+		if ((std::regex_search(line,match,std::regex("(\\d{1,2})[\\/\\.](\\d{1,2})[\\.\\/](\\d{2,4})")) || std::regex_search(line,match,std::regex("(\\d{1,2})-(\\d{1,2})-(\\d{2,4})"))) && (datestr.empty()))
 		{
 			std::string monthstr = match.str(1);
 			std::string daystr = match.str(2);
@@ -69,6 +69,7 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 			// Exhibition check
 			if (datestr.compare(startdate) < 0)
 			{
+				std::cout << datestr << " is before " << startdate << ", skipping..." << std::endl;
 				datestr = "";
 				break;
 			}
@@ -345,6 +346,18 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 							}
 						}
 						break;
+					case 16:
+						if (statparts.size() == 17)
+						{
+							if (totallabelcount == 1)
+							{
+								awaystatline["MIN"] = match.str(1);
+							}
+							else if (totallabelcount == 2)
+							{
+								homestatline["MIN"] = match.str(1);
+							}
+						}
 					}
 					//std::cout << match.str(1) << std::endl;
 				}
@@ -382,6 +395,14 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 		awayteam.SetTotalRebounds(std::stod(awaystatline["REB"]));
 		awayteam.SetTotalFreeThrows(std::stod(awaystatline["FTM"]));
 		awayteam.SetTotalFreeThrowAttempts(std::stod(awaystatline["FTA"]));
+		try
+		{
+			awayteam.SetTotalMinutes(std::stod(awaystatline["MIN"]));
+		}
+		catch(...)
+		{
+			awayteam.SetTotalMinutes(0);
+		}
 
 		hometeam.SetDateString(datestr);
 		hometeam.SetTeamPoints(std::stod(homestatline["PTS"]));
@@ -393,6 +414,13 @@ std::optional<std::pair<Stats,Stats>> PdfBoxScore::ProcessUrl(const std::string 
 		hometeam.SetTotalRebounds(std::stod(homestatline["REB"]));
 		hometeam.SetTotalFreeThrows(std::stod(homestatline["FTM"]));
 		hometeam.SetTotalFreeThrowAttempts(std::stod(homestatline["FTA"]));
+		try{
+			hometeam.SetTotalMinutes(std::stod(homestatline["MIN"]));
+		}
+		catch(...)
+		{
+			hometeam.SetTotalMinutes(0);
+		}
 		return std::make_pair(awayteam,hometeam);
 	}
 	else
