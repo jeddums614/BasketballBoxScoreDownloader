@@ -30,8 +30,7 @@ enum class BoxScoreFormatType {
 	XML,
 	DBML,
 	PDF,
-	HTML,
-	SPORTSREF
+	HTML
 };
 
 class Utils
