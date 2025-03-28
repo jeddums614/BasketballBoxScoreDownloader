@@ -26,6 +26,7 @@ enum StatValType
 enum class BoxScoreFormatType {
 	NONE,
 	ASPX,
+	ASPX2,
 	XML,
 	DBML,
 	PDF,

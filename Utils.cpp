@@ -10,6 +10,7 @@
 #include "Downloader.h"
 #include "IBoxScore.h"
 #include "AspxBoxScore.h"
+#include "AspxBoxScore2.h"
 #include "XmlBoxScore.h"
 #include "DbmlBoxScore.h"
 #include "PdfBoxScore.h"
@@ -50,6 +51,10 @@ void Utils::Run(int teamId)
 	{
 		formatType = BoxScoreFormatType::ASPX;
 	}
+	else if (teaminfo[3].compare("aspx2") == 0)
+	{
+		formatType = BoxScoreFormatType::ASPX2;
+	}
 	else if (teaminfo[3].compare("xml") == 0)
 	{
 		formatType = BoxScoreFormatType::XML;
@@ -82,7 +87,7 @@ void Utils::Run(int teamId)
 	{
 		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\" target";
 	}
-	else if (teamname.compare("UMES") == 0 || teamname.find("Barbara") != std::string::npos || teamname.find("Bryant") != std::string::npos || (teamname.find("UConn") != std::string::npos && formatType == BoxScoreFormatType::DBML) || (teamname.find("Penn St") != std::string::npos && formatType == BoxScoreFormatType::DBML))
+	else if (teamname.compare("UMES") == 0 || teamname.find("Barbara") != std::string::npos || teamname.find("Bryant") != std::string::npos /*|| (teamname.find("UConn") != std::string::npos && formatType == BoxScoreFormatType::DBML)*/ || (teamname.find("Penn St") != std::string::npos && formatType == BoxScoreFormatType::DBML))
 	{
 		regexstr = "href=\"([A-Za-z0-9\\/:.,?=&;_ \\-~]+)\"[ ]+class";
 	}
@@ -110,8 +115,9 @@ void Utils::Run(int teamId)
 
 	std::vector<std::string> boxscorelinks;
 
+	//TODO: Add config setting to choose between curl and google chrome for downloading
 	//std::string linkcommand = "google-chrome --headless --dump-dom '"+scheduleurl+"'";
-	//schedcontent = Utils::exec(linkcommand);
+	//std::string schedcontent = Utils::exec(linkcommand);
 
 	//std::cout << schedcontent << std::endl; // debug statement
 
@@ -311,6 +317,10 @@ void Utils::Run(int teamId)
 		boxScoreObj = std::make_unique<AspxBoxScore>();
 		break;
 
+	case BoxScoreFormatType::ASPX2:
+		boxScoreObj = std::make_unique<AspxBoxScore2>();
+		break;
+
 	case BoxScoreFormatType::DBML:
 		boxScoreObj = std::make_unique<DbmlBoxScore>();
 		break;
@@ -342,7 +352,7 @@ void Utils::Run(int teamId)
 	}
 
 	int numgames = 0;
-	//boxscorelinks = {"https://vucommodores.com/wp-content/uploads/2020/04/2009-10-MBB-All-Boxes.pdf"};
+	//boxscorelinks = {"https://static.lsusports.net/pdf9/3213742.pdf"};
 	//boxScoreObj = std::make_unique<PdfBoxScore>();
 	for (std::string bslink : boxscorelinks)
 	{
@@ -464,18 +474,20 @@ void Utils::Run(int teamId)
 			if (numgames == 0)
 			{
 				std::stringstream query;
-				query << "insert into gamebygamedata (gamedate,team1,team1pts,team1total3ptfg,team1totalfgm,team1totalfga,team1totalto,team1totaloreb,team1totalreb,team1totalftm,team1totalfta,team2,team2pts,team2total3ptfg,team2totalfgm,team2totalfga,team2totalto,team2totaloreb,team2totalreb,team2totalftm,team2totalfta) values ('";
+				query << "insert into gamebygamedata (gamedate,team1,team1pts,team1total3ptfg,team1totalfgm,team1totalfga,team1totalto,team1totaloreb,team1totalreb,team1totalftm,team1totalfta,team1totalmin,team2,team2pts,team2total3ptfg,team2totalfgm,team2totalfga,team2totalto,team2totaloreb,team2totalreb,team2totalftm,team2totalfta,team2totalmin) values ('";
 				query << awayteam.GetDateString() << "','" << awayteamname
 					  << "'," << awayteam.GetTeamPoints() << "," << awayteam.GetThreePointFieldGoals()
 					  << "," << awayteam.GetTotalFieldGoals() << "," << awayteam.GetTotalFieldGoalAttempts()
 					  << "," << awayteam.GetTotalTurnovers() << "," << awayteam.GetTotalOffensiveRebounds()
 					  << "," << awayteam.GetTotalRebounds() << "," << awayteam.GetTotalFreeThrows()
-					  << "," << awayteam.GetTotalFreeThrowAttempts() << ",'" << hometeamname
+					  << "," << awayteam.GetTotalFreeThrowAttempts()
+					  << "," << awayteam.GetTotalMinutes() << ",'" << hometeamname
 					  << "'," << hometeam.GetTeamPoints() << "," << hometeam.GetThreePointFieldGoals()
 					  << "," << hometeam.GetTotalFieldGoals() << "," << hometeam.GetTotalFieldGoalAttempts()
 					  << "," << hometeam.GetTotalTurnovers() << "," << hometeam.GetTotalOffensiveRebounds()
 					  << "," << hometeam.GetTotalRebounds() << "," << hometeam.GetTotalFreeThrows()
-					  << "," << hometeam.GetTotalFreeThrowAttempts() << ");";
+					  << "," << hometeam.GetTotalFreeThrowAttempts()
+					  << "," << hometeam.GetTotalMinutes() << ");";
 
 				if (DBWrapper::AddEntry(query.str()))
 				{
